@@ -1,0 +1,29 @@
+FROM maven:3.8.4-openjdk-17-slim as build
+WORKDIR /app
+COPY pom.xml .
+COPY src/main/resources/lib/DAO_MANUFACTURA-1.0-SNAPSHOT.jar /root/.m2/repository/com/mycompany/DAO_MANUFACTURA/1.0-SNAPSHOT/DAO_MANUFACTURA-1.0-SNAPSHOT.jar
+COPY src/main/resources/lib/DominioManufactura-1.0.jar /root/.m2/repository/com/mycompany/DominioManufactura/1.0/DominioManufactura-1.0.jar
+COPY src/main/resources/lib/ServicioJWT-1.0.jar /root/.m2/repository/com/mycompany/ServicioJWT/1.0/ServicioJWT-1.0.jar
+RUN apt-get update && apt-get install -y maven
+RUN mvn dependency:go-offline
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Copiar el archivo tar de Maven desde una carpeta antes
+COPY maven_3.8.4_openjdk_17_slim.tar /opt/
+RUN tar -xf maven_3.8.4_openjdk_17_slim.tar && \
+    rm maven_3.8.4_openjdk_17_slim.tar
+
+# Copiar el archivo tar de Apache TomEE desde una carpeta antes
+COPY ../apache-tomee-9.1.2-plus.tar.gz /opt/
+RUN tar -xzf apache-tomee-9.1.2-plus.tar.gz && \
+    mv apache-tomee-plus-9.1.2 tomee && \
+    rm apache-tomee-9.1.2-plus.tar.gz
+
+FROM openjdk:17-slim
+WORKDIR /opt
+COPY --from=build /app/target/*.war /opt/tomee/webapps/GestorDefectos.war
+EXPOSE 8080
+WORKDIR /opt/tomee/bin
+RUN chmod +x catalina.sh
+CMD ["./catalina.sh", "run"]

@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+
+  rpc:
+    build:
+      context: ./  # El contexto es la carpeta donde está el Dockerfile
+      dockerfile: ./rpc/dockerfile 
+    ports:
+      - "8088:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3305
+      - MYSQL_DATABASE=manufactura
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345
+    depends_on:
+      - rabbitmq
+      - mysql
+    networks:
+      - my_network
+
+  sistemaerp:
+    build:
+      context: ./  # El contexto es la carpeta donde está el Dockerfile
+      dockerfile: ./sistemaerp/dockerfile 
+    ports:
+      - "8087:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - my_network
+
+  sistemaqa:
+    build:
+      context: ./  # El contexto es la carpeta donde está el Dockerfile
+      dockerfile: ./sistemaqa/dockerfile 
+    ports:
+      - "8086:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - my_network
+
+  gestordefectos:
+    build:
+      context: ./
+      dockerfile: ./gestordefectos/dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3305
+      - MYSQL_DATABASE=manufactura
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345
+    depends_on:
+      - rabbitmq
+      - mysql
+    networks:
+      - my_network
+
+  accesodatosusa:
+    build:
+      context: ./
+      dockerfile: ./sistemaaccesoadatosusa/dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
+    networks:
+      - my_network
+      
+  inspector:
+    build:
+      context: ./
+      dockerfile: ./inspector/dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3305
+      - MYSQL_DATABASE=manufactura
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345
+    depends_on:
+      - rabbitmq
+      - mysql
+    networks:
+      - my_network
+      
+  gestorreportes:
+    build:
+      context: ./
+      dockerfile: ./gestorreporte/dockerfile
+    ports:
+      - "8083:8080"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3305
+      - MYSQL_DATABASE=manufactura
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345
+    depends_on:
+      - rabbitmq
+      - mysql
+    networks:
+      - my_network  
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - my_network
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3305:3305"
+    environment:
+      - MYSQL_ROOT_PASSWORD=12345
+    networks:
+      - my_network
+    volumes:
+      - ./mysql-initdb:/docker-entrypoint-initdb.d
+
+networks:
+  my_network:

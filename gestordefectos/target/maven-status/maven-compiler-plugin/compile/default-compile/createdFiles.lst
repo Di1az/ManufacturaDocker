@@ -1,0 +1,9 @@
+com\mycompany\servidorrestmanufactura\DefectosResource.class
+com\mycompany\servidorrestmanufactura\resources\JakartaEE91Resource.class
+com\mycompany\servidorrestmanufactura\JakartaRestConfiguration.class
+Token\Mensaje.class
+Cifrado\Encriptar.class
+RPC\RPCDefectos.class
+RabbitMQ\RabbitMQPublisher.class
+com\mycompany\servidorrestmanufactura\resources\AuthenticateResource.class
+Filtro\FiltroDefectos.class

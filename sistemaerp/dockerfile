@@ -1,0 +1,28 @@
+# Usa una imagen base de Maven para compilar tu aplicación y gestionar las dependencias
+FROM maven:3.8.4-openjdk-17-slim as build
+
+# Copia todos los archivos al contenedor
+COPY . /sistemaerp/ .
+
+
+# Establece el directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Compila tu aplicación y empaquétala en un archivo JAR
+RUN mvn clean package -DskipTests
+# Copiar el archivo tar de Maven desde una carpeta antes
+FROM openjdk:17-slim
+WORKDIR /opt
+COPY ../maven_3.8.4_openjdk_17_slim.tar /opt/
+RUN tar -xf maven_3.8.4_openjdk_17_slim.tar && \
+    rm maven_3.8.4_openjdk_17_slim.tar
+
+
+# Copia el archivo JAR generado por Maven al contenedor
+COPY ./sistemaerp/target/SistemaERP-1.0-jar-with-dependencies.jar /app/sistemaerp.jar
+
+# Establece el directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Especifica cómo ejecutar tu aplicación cuando se inicie el contenedor
+CMD ["java", "-jar", "app.jar"]
